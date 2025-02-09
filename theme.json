@@ -1,0 +1,29 @@
+{
+  "variant": "professional",
+  "primary": "hsl(262, 83%, 58%)",
+  "appearance": "light",
+  "radius": 0.5,
+  "cssVars": {
+    "light": {
+      "background": "0 0% 100%",
+      "foreground": "240 10% 4%",
+      "card": "0 0% 100%",
+      "card-foreground": "240 10% 4%",
+      "popover": "0 0% 100%",
+      "popover-foreground": "240 10% 4%",
+      "primary": "262 83% 58%",
+      "primary-foreground": "0 0% 100%",
+      "secondary": "172 100% 44%",
+      "secondary-foreground": "0 0% 100%",
+      "muted": "240 5% 96%",
+      "muted-foreground": "240 4% 46%",
+      "accent": "272 76% 76%",
+      "accent-foreground": "0 0% 100%",
+      "destructive": "0 84% 60%",
+      "destructive-foreground": "0 0% 100%",
+      "border": "240 6% 90%",
+      "input": "240 6% 90%",
+      "ring": "262 83% 58%"
+    }
+  }
+}

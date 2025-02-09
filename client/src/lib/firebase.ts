@@ -18,33 +18,20 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app;
-try {
-  app = initializeApp(firebaseConfig);
-} catch (error) {
-  console.error("Firebase initialization error:", error);
-  throw error;
-}
-
+export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-interface AuthUser extends User {
+export interface AuthUser extends User {
   firebaseUid: string;
 }
 
-interface AuthState {
-  user: AuthUser | null;
-  loading: boolean;
-  error: Error | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-}
-
-export const useAuth = create<AuthState>((set) => ({
+export const useAuth = create((set) => ({
   user: null,
   loading: true,
   error: null,
+  setUser: (user: AuthUser | null) => set({ user }),
+  setLoading: (loading: boolean) => set({ loading }),
+  setError: (error: any) => set({ error }),
   signIn: async (email: string, password: string) => {
     try {
       set({ loading: true, error: null });
@@ -81,13 +68,8 @@ export const useAuth = create<AuthState>((set) => ({
   },
 }));
 
-// Setup auth state listener
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    const authUser = user as AuthUser;
-    authUser.firebaseUid = user.uid;
-    useAuth.setState({ user: authUser, loading: false });
-  } else {
-    useAuth.setState({ user: null, loading: false });
-  }
+// Set up auth state listener
+onAuthStateChanged(auth, (user) => {
+  useAuth.getState().setLoading(false);
+  useAuth.getState().setUser(user as AuthUser | null);
 });

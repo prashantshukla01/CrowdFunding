@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { Campaign, Contribution, insertContributionSchema } from "@shared/schema";
@@ -9,6 +10,9 @@ import { useAuth } from "@/lib/firebase";
 import { ethers } from "ethers";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 const CAMPAIGN_IMAGES = [
   "https://images.unsplash.com/photo-1591901206069-ed60c4429a2e",
@@ -22,6 +26,8 @@ export default function CampaignPage() {
   const { provider, address } = useWeb3();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [amount, setAmount] = useState("");
 
   const { data: campaign, isLoading: campaignLoading } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${id}`],
@@ -39,11 +45,10 @@ export default function CampaignPage() {
 
       const signer = await provider.getSigner();
       const tx = await signer.sendTransaction({
-        to: campaign?.walletAddress || address, // In production, this would be a smart contract address
+        to: campaign?.walletAddress || address,
         value: ethers.parseEther(amount),
       });
 
-      // Record contribution in our backend
       const contribution = {
         userId: Number(user.firebaseUid),
         campaignId: Number(id),
@@ -64,6 +69,8 @@ export default function CampaignPage() {
         title: "Contribution successful",
         description: "Thank you for supporting this campaign!",
       });
+      setIsDialogOpen(false);
+      setAmount("");
     },
     onError: (error) => {
       toast({
@@ -100,10 +107,9 @@ export default function CampaignPage() {
   const imageIndex = Number(id) % CAMPAIGN_IMAGES.length;
 
   const handleContribute = async () => {
-    const amount = prompt("Enter amount in ETH:");
-    if (!amount) return;
-
     try {
+      if (!amount) return;
+      
       insertContributionSchema.parse({
         amount,
         userId: Number(user?.firebaseUid),
@@ -181,10 +187,10 @@ export default function CampaignPage() {
               <CardFooter>
                 <Button 
                   className="w-full" 
-                  onClick={handleContribute}
-                  disabled={!user || !address || contributeMutation.isPending}
+                  onClick={() => setIsDialogOpen(true)}
+                  disabled={!user || !address}
                 >
-                  {contributeMutation.isPending ? "Contributing..." : "Contribute Now"}
+                  {!user ? "Sign in to contribute" : !address ? "Connect wallet to contribute" : "Contribute Now"}
                 </Button>
               </CardFooter>
             </Card>
@@ -225,6 +231,33 @@ export default function CampaignPage() {
           </motion.div>
         </div>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Contribute to {campaign.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Amount (ETH)</label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Enter amount in ETH"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleContribute} disabled={contributeMutation.isPending}>
+              {contributeMutation.isPending ? "Contributing..." : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

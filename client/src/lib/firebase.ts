@@ -1,5 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPopup, GoogleAuthProvider, User } from "firebase/auth";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  type User
+} from "firebase/auth";
 import { create } from "zustand";
 
 const firebaseConfig = {
@@ -29,7 +36,8 @@ interface AuthState {
   user: AuthUser | null;
   loading: boolean;
   error: Error | null;
-  signIn: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -37,11 +45,10 @@ export const useAuth = create<AuthState>((set) => ({
   user: null,
   loading: true,
   error: null,
-  signIn: async () => {
+  signIn: async (email: string, password: string) => {
     try {
       set({ loading: true, error: null });
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithEmailAndPassword(auth, email, password);
       const user = result.user as AuthUser;
       user.firebaseUid = user.uid;
       set({ user, loading: false, error: null });
@@ -50,10 +57,22 @@ export const useAuth = create<AuthState>((set) => ({
       set({ error: error as Error, loading: false });
     }
   },
+  signUp: async (email: string, password: string) => {
+    try {
+      set({ loading: true, error: null });
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      const user = result.user as AuthUser;
+      user.firebaseUid = user.uid;
+      set({ user, loading: false, error: null });
+    } catch (error) {
+      console.error('Sign up error:', error);
+      set({ error: error as Error, loading: false });
+    }
+  },
   signOut: async () => {
     try {
       set({ loading: true, error: null });
-      await auth.signOut();
+      await firebaseSignOut(auth);
       set({ user: null, loading: false, error: null });
     } catch (error) {
       console.error('Sign out error:', error);

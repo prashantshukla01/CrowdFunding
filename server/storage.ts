@@ -84,6 +84,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContributionsByUser(userId: number): Promise<Contribution[]> {
+    if (!userId || isNaN(userId)) {
+      return [];
+    }
     return await db.select().from(contributions).where(eq(contributions.userId, userId));
   }
 

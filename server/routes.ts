@@ -55,7 +55,12 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.get("/api/users/:id/contributions", async (req, res) => {
-    const contributions = await storage.getContributionsByUser(Number(req.params.id));
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
+    const contributions = await storage.getContributionsByUser(id);
     res.json(contributions);
   });
 

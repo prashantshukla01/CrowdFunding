@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { Wallet2 } from "lucide-react";
 
 export function Navbar() {
-  const { user, signIn, signOut } = useAuth();
-  const { address, connect, disconnect } = useWeb3();
+  const { user, signOut } = useAuth();
+  const { address, disconnect } = useWeb3();
   const [location] = useLocation();
 
   // Don't show navbar on sign-in page
@@ -42,8 +42,8 @@ export function Navbar() {
                 {`${address.slice(0, 6)}...${address.slice(-4)}`}
               </Button>
             ) : (
-              <Button onClick={connect}>
-                Connect Wallet
+              <Button asChild>
+                <Link href="/connect-wallet">Connect Wallet</Link>
               </Button>
             )}
 
@@ -63,10 +63,10 @@ export function Navbar() {
               </div>
             ) : (
               <Button 
-                onClick={() => signIn()}
+                asChild
                 className="bg-gradient-to-r from-[#2A004E] to-[#500073] hover:from-[#500073] hover:to-[#2A004E]"
               >
-                Sign In
+                <Link href="/sign-in">Sign In</Link>
               </Button>
             )}
           </div>

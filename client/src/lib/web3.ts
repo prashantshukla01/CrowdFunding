@@ -26,7 +26,7 @@ export const useWeb3 = create<Web3State>((set) => ({
   error: null,
   connect: async () => {
     try {
-      set({ loading: true });
+      set({ loading: true, error: null });
 
       if (!window.ethereum) {
         throw new Error("Please install MetaMask!");
@@ -49,13 +49,15 @@ export const useWeb3 = create<Web3State>((set) => ({
         error: error as Error,
         loading: false
       });
+      throw error;
     }
   },
   disconnect: () => {
     set({ 
       provider: null, 
       address: null, 
-      balance: null 
+      balance: null,
+      error: null
     });
   },
 }));

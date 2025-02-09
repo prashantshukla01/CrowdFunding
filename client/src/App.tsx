@@ -8,6 +8,7 @@ import Dashboard from "@/pages/dashboard";
 import Profile from "@/pages/profile";
 import Campaign from "@/pages/campaign";
 import SignIn from "@/pages/sign-in";
+import ConnectWallet from "@/pages/connect-wallet";
 import NotFound from "@/pages/not-found";
 import { useAuth } from "@/lib/firebase";
 
@@ -38,6 +39,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/sign-in" component={SignIn} />
+          <Route path="/connect-wallet" component={ConnectWallet} />
           <Route path="/dashboard">
             <ProtectedRoute component={Dashboard} path="/dashboard" />
           </Route>

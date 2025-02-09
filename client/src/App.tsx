@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import Profile from "@/pages/profile";
 import Campaign from "@/pages/campaign";
+import SignIn from "@/pages/sign-in";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <main>
         <Switch>
           <Route path="/" component={Home} />
+          <Route path="/sign-in" component={SignIn} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/profile" component={Profile} />
           <Route path="/campaign/:id" component={Campaign} />

@@ -14,6 +14,36 @@ const CAMPAIGN_IMAGES = [
   "https://images.unsplash.com/photo-1591901206107-a81f5b57e7f3",
 ];
 
+const DEMO_CAMPAIGNS = [
+  {
+    id: 1,
+    title: "Clean Energy for Rural Communities",
+    description: "Help us bring sustainable solar power to remote villages, transforming lives through renewable energy access.",
+    currentAmount: "2.5",
+    fundingGoal: "5",
+    status: "active",
+    image: CAMPAIGN_IMAGES[0]
+  },
+  {
+    id: 2,
+    title: "Ocean Cleanup Initiative",
+    description: "Join our mission to remove plastic waste from the oceans and protect marine ecosystems for future generations.",
+    currentAmount: "3.8",
+    fundingGoal: "10",
+    status: "active",
+    image: CAMPAIGN_IMAGES[1]
+  },
+  {
+    id: 3,
+    title: "Education Technology Fund",
+    description: "Bringing modern learning tools to underserved schools and empowering the next generation through education.",
+    currentAmount: "1.2",
+    fundingGoal: "4",
+    status: "active",
+    image: CAMPAIGN_IMAGES[2]
+  }
+];
+
 const container = {
   hidden: { opacity: 0 },
   show: {
@@ -105,7 +135,7 @@ export default function Home() {
                 animate="show"
                 className="campaign-grid"
               >
-                {campaigns?.slice(0, 6).map((campaign, i) => {
+                {(campaigns?.length ? campaigns : DEMO_CAMPAIGNS).map((campaign, i) => {
                   const progress = (Number(campaign.currentAmount) / Number(campaign.fundingGoal)) * 100;
 
                   return (

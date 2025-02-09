@@ -14,8 +14,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
+interface AuthUser extends User {
+  firebaseUid: string;
+}
+
 interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   loading: boolean;
   error: Error | null;
   signIn: () => Promise<void>;
@@ -30,7 +34,9 @@ export const useAuth = create<AuthState>((set) => ({
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      set({ user: result.user, error: null });
+      const user = result.user as AuthUser;
+      user.firebaseUid = user.uid;
+      set({ user, error: null });
     } catch (error) {
       set({ error: error as Error });
       console.error('Sign in error:', error);
@@ -49,5 +55,11 @@ export const useAuth = create<AuthState>((set) => ({
 
 // Setup auth state listener
 auth.onAuthStateChanged((user) => {
-  useAuth.setState({ user, loading: false });
+  if (user) {
+    const authUser = user as AuthUser;
+    authUser.firebaseUid = user.uid;
+    useAuth.setState({ user: authUser, loading: false });
+  } else {
+    useAuth.setState({ user: null, loading: false });
+  }
 });

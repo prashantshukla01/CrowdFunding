@@ -8,6 +8,7 @@ import { useWeb3 } from "@/lib/web3";
 import { useAuth } from "@/lib/firebase";
 import { ethers } from "ethers";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 const CAMPAIGN_IMAGES = [
   "https://images.unsplash.com/photo-1591901206069-ed60c4429a2e",
@@ -32,19 +33,19 @@ export default function CampaignPage() {
 
   const contributeMutation = useMutation({
     mutationFn: async (amount: string) => {
-      if (!provider || !address || !user) {
+      if (!provider || !address || !user?.firebaseUid) {
         throw new Error("Please connect wallet and sign in");
       }
 
       const signer = await provider.getSigner();
       const tx = await signer.sendTransaction({
-        to: campaign?.userId.toString(), // In production, this would be a smart contract address
+        to: campaign?.walletAddress || address, // In production, this would be a smart contract address
         value: ethers.parseEther(amount),
       });
 
       // Record contribution in our backend
       const contribution = {
-        userId: user.id,
+        userId: Number(user.firebaseUid),
         campaignId: Number(id),
         amount,
         transactionHash: tx.hash,
@@ -76,7 +77,9 @@ export default function CampaignPage() {
   if (campaignLoading) {
     return (
       <div className="container py-10">
-        <div>Loading...</div>
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
       </div>
     );
   }
@@ -84,7 +87,11 @@ export default function CampaignPage() {
   if (!campaign) {
     return (
       <div className="container py-10">
-        <div>Campaign not found</div>
+        <Card>
+          <CardContent className="py-10">
+            <div className="text-center text-muted-foreground">Campaign not found</div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -99,10 +106,10 @@ export default function CampaignPage() {
     try {
       insertContributionSchema.parse({
         amount,
-        userId: user?.id,
+        userId: Number(user?.firebaseUid),
         campaignId: Number(id),
       });
-      
+
       await contributeMutation.mutateAsync(amount);
     } catch (error) {
       toast({
@@ -114,81 +121,110 @@ export default function CampaignPage() {
   };
 
   return (
-    <div className="container py-10">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="container py-10"
+    >
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <img
+          <motion.img
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
             src={campaign.image || CAMPAIGN_IMAGES[imageIndex]}
             alt={campaign.title}
-            className="w-full aspect-video object-cover rounded-lg"
+            className="w-full aspect-video object-cover rounded-lg shadow-md"
           />
-          
-          <div>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
             <h1 className="text-3xl font-bold tracking-tight mb-4">{campaign.title}</h1>
             <p className="text-muted-foreground whitespace-pre-wrap">{campaign.description}</p>
-          </div>
+          </motion.div>
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Campaign Progress</CardTitle>
-              <CardDescription>
-                Help us reach our goal
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Progress value={progress} />
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Raised</span>
-                  <span className="font-medium">{campaign.currentAmount} ETH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Goal</span>
-                  <span className="font-medium">{campaign.fundingGoal} ETH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Progress</span>
-                  <span className="font-medium">{Math.round(progress)}%</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button 
-                className="w-full" 
-                onClick={handleContribute}
-                disabled={!user || !address || contributeMutation.isPending}
-              >
-                {contributeMutation.isPending ? "Contributing..." : "Contribute Now"}
-              </Button>
-            </CardFooter>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Contributions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {contributions?.map((contribution) => (
-                  <div key={contribution.id} className="flex justify-between items-center">
-                    <div className="text-sm">
-                      <div className="font-medium">Anonymous</div>
-                      <div className="text-muted-foreground">
-                        {new Date(contribution.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <div className="font-medium">
-                      {contribution.amount} ETH
-                    </div>
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Campaign Progress</CardTitle>
+                <CardDescription>
+                  Help us reach our goal
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Progress value={progress} className="h-2" />
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Raised</span>
+                    <span className="font-medium">{campaign.currentAmount} ETH</span>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="flex justify-between">
+                    <span>Goal</span>
+                    <span className="font-medium">{campaign.fundingGoal} ETH</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Progress</span>
+                    <span className="font-medium">{Math.round(progress)}%</span>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  className="w-full" 
+                  onClick={handleContribute}
+                  disabled={!user || !address || contributeMutation.isPending}
+                >
+                  {contributeMutation.isPending ? "Contributing..." : "Contribute Now"}
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Contributions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {contributions?.map((contribution) => (
+                    <motion.div
+                      key={contribution.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-between items-center p-3 rounded-lg bg-muted/50"
+                    >
+                      <div className="text-sm">
+                        <div className="font-medium">Anonymous</div>
+                        <div className="text-muted-foreground">
+                          {new Date(contribution.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="font-medium">
+                        {contribution.amount} ETH
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -19,6 +19,7 @@ export const campaigns = pgTable("campaigns", {
   description: text("description").notNull(),
   fundingGoal: text("funding_goal").notNull(), // Store as string for high precision
   currentAmount: text("current_amount").notNull().default("0"),
+  walletAddress: text("wallet_address").notNull().default(''),
   image: text("image").notNull().default(''),
   status: text("status").notNull().default("active"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

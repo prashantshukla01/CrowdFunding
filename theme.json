@@ -1,8 +1,8 @@
 {
-  "variant": "professional",
+  "variant": "vibrant",
   "primary": "hsl(262, 83%, 58%)",
   "appearance": "light",
-  "radius": 0.5,
+  "radius": 0.75,
   "cssVars": {
     "light": {
       "background": "0 0% 100%",
@@ -23,7 +23,14 @@
       "destructive-foreground": "0 0% 100%",
       "border": "240 6% 90%",
       "input": "240 6% 90%",
-      "ring": "262 83% 58%"
+      "ring": "262 83% 58%",
+      "chart": {
+        "1": "262 83% 58%",
+        "2": "172 100% 44%",
+        "3": "272 76% 76%",
+        "4": "240 5% 96%",
+        "5": "240 4% 46%"
+      }
     }
   }
 }

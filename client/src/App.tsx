@@ -9,6 +9,26 @@ import Profile from "@/pages/profile";
 import Campaign from "@/pages/campaign";
 import SignIn from "@/pages/sign-in";
 import NotFound from "@/pages/not-found";
+import { useAuth } from "@/lib/firebase";
+
+function ProtectedRoute({ component: Component, ...props }: { component: React.ComponentType; path: string }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    window.location.href = "/sign-in";
+    return null;
+  }
+
+  return <Component {...props} />;
+}
 
 function Router() {
   return (
@@ -18,8 +38,12 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/sign-in" component={SignIn} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/profile" component={Profile} />
+          <Route path="/dashboard">
+            <ProtectedRoute component={Dashboard} path="/dashboard" />
+          </Route>
+          <Route path="/profile">
+            <ProtectedRoute component={Profile} path="/profile" />
+          </Route>
           <Route path="/campaign/:id" component={Campaign} />
           <Route component={NotFound} />
         </Switch>

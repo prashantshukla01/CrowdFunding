@@ -11,7 +11,14 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+} catch (error) {
+  console.error("Firebase initialization error:", error);
+  throw error;
+}
+
 export const auth = getAuth(app);
 
 interface AuthUser extends User {
@@ -32,23 +39,25 @@ export const useAuth = create<AuthState>((set) => ({
   error: null,
   signIn: async () => {
     try {
+      set({ loading: true, error: null });
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user as AuthUser;
       user.firebaseUid = user.uid;
-      set({ user, error: null });
+      set({ user, loading: false, error: null });
     } catch (error) {
-      set({ error: error as Error });
       console.error('Sign in error:', error);
+      set({ error: error as Error, loading: false });
     }
   },
   signOut: async () => {
     try {
+      set({ loading: true, error: null });
       await auth.signOut();
-      set({ user: null, error: null });
+      set({ user: null, loading: false, error: null });
     } catch (error) {
-      set({ error: error as Error });
       console.error('Sign out error:', error);
+      set({ error: error as Error, loading: false });
     }
   },
 }));
